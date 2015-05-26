@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="css/default.css" />
+    <script src="javascript/jquery-1.11.2.min.js"></script>
+    <script src="javascript/jquery.mobile-1.4.5.min.js"></script>
+    <script type="text/javascript" src="javascript/moment.min.js"></script>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="javascript/default.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            document.addEventListener("deviceready", onDeviceReady, false);
+            //onDeviceReady();
+
+            function onDeviceReady() {
+                var dagen = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
+                var prevdag = -1;
+                 
+                try {
+                    db = openDatabase("CardioFitness", "1.0", "Cardio Fitness Noord App", 200000);
+
+                    var ul = $('#lessen');
+                    db.transaction(function (tx) {
+                        tx.executeSql("SELECT dag, tijd, tekst FROM Lessen ", [], function (tx, result) { 
+                            if (result.rows.length > 0) {
+                                for (i = 0; i < result.rows.length; i++) {
+                                    item = result.rows.item(i);
+
+                                    if (parseInt(item['dag']) != prevdag) {
+                                        $('<li />')
+										.attr('data-role', 'list-divider')
+										.attr('role', 'heading')
+										.addClass('ui-li-divider ui-bar-inherit')
+										.css('text-transform', 'uppercase')
+										.html(dagen[parseInt(item['dag'])])
+										.appendTo(ul);
+                                    }
+
+                                    $('<li />')
+									.attr('data-icon', 'false')
+									.attr('data-theme', 'c')
+									.html('<a href="#" class="ui-btn ui-btn-c"><p>' + item['tijd'] + '</p><span style="font-weight: 100; font-size: 12px; padding-left: 2px;"> ' + item['tekst'] + '</span></a>')
+									.appendTo(ul);
+
+                                    prevdag = parseInt(item['dag']);
+                                }
+
+                                ul.find('li:first').addClass('ui-first-child');
+                                ul.find('li:last').addClass('ui-last-child');
+                            }
+                        }, onError);
+                    });
+                } catch (err) {
+                    showMessage('Databases are not supported in this browser.');
+                }
+
+            }
+             
+        });
+    </script>
+</head>
+<body>
+    <div data-role="page">
+	    <div data-role="header" data-position="fixed">
+	        <a class="demo-icon icon-reply-outline" role="link" data-rel="back" data-transition="none" data-direction="reverse">&#xe80b;</a> 
+		    <h1>Groepslessen</h1> 
+		    <div style="display: block; text-align:center"><img src="images/logo.png" style="margin-top: 5px;" /></div>
+	    </div>
+	    <div data-role="content" class="ui-content" style="height: 100%;">  
+		    <ul id="lessen" data-role="listview" data-autodividers="false" data-inset="true"></ul>
+	    </div>
+	    <div data-role="footer" data-position="fixed">&nbsp;</div>
+    </div>
+</body>
+</html>

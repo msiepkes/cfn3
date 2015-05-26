@@ -1,0 +1,305 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="css/default.css" />
+    <script src="javascript/jquery-1.11.2.min.js"></script>
+    <script src="javascript/jquery.mobile-1.4.5.min.js"></script>
+    <script type="text/javascript" src="javascript/moment.min.js"></script>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="javascript/default.js"></script>
+
+    <script>
+        var db;
+        var aantalUpdates = 0;
+        $(document).ready(function () {
+            document.addEventListener("deviceready", onDeviceReady, false);
+            //onDeviceReady();
+
+            function onDeviceReady() { 
+                try {
+                    db = openDatabase("CardioFitness", "1.0", "Cardio Fitness Noord App", 200000);
+                    db.transaction(populateDB, onError, loadProperties);
+                } catch (err) {
+                    showMessage('Databases are not supported in this browser.');
+                }
+
+                function populateDB(tx) {
+                  /*  db.transaction(function (tx) { tx.executeSql("DROP TABLE Properties", [], null, onError); });
+                    db.transaction(function (tx) { tx.executeSql("DROP TABLE Tijden", [], null, onError); });
+                    db.transaction(function (tx) { tx.executeSql("DROP TABLE Lessen", [], null, onError); });
+                    db.transaction(function (tx) { tx.executeSql("DROP TABLE Schema", [], null, onError); });
+                    db.transaction(function (tx) { tx.executeSql("DROP TABLE Gebruiker", [], null, onError); });
+                    db.transaction(function (tx) { tx.executeSql("DROP TABLE Resultaten", [], null, onError); });
+                    */
+
+                    db.transaction(function (tx) { tx.executeSql("CREATE TABLE IF NOT EXISTS Properties (id INTEGER PRIMARY KEY AUTOINCREMENT, schema NVARCHAR(20), lessen NVARCHAR(20), tijden NVARCHAR(20), versie INT(11))", [], null, onError); });
+                    db.transaction(function (tx) { tx.executeSql("CREATE TABLE IF NOT EXISTS Tijden (id INTEGER PRIMARY KEY AUTOINCREMENT, maandag NVARCHAR(50), dinsdag NVARCHAR(50), woensdag NVARCHAR(50), donderdag NVARCHAR(50), vrijdag NVARCHAR(50), zaterdag NVARCHAR(50), zondag NVARCHAR(50), content NTEXT)", [], null, onError); });
+                    db.transaction(function (tx) { tx.executeSql("CREATE TABLE IF NOT EXISTS Lessen (id INTEGER PRIMARY KEY AUTOINCREMENT, dag INT(11), tijd NVARCHAR(20), tekst NVARCHAR(255))", [], null, onError); });
+                    db.transaction(function (tx) { tx.executeSql("CREATE TABLE IF NOT EXISTS Schema (id INTEGER PRIMARY KEY AUTOINCREMENT, schemaid INT(11), dag INT(11), soort NVARCHAR(250), categorie NVARCHAR(250), afbeelding NVARCHAR(250), nummer INT(11), naam NVARCHAR(250), tijdsduur NVARCHAR(10), afstand NVARCHAR(10), sets NVARCHAR(10), herhalingen NVARCHAR(10), gewicht NVARCHAR(10), opmerking NTEXT)", [], null, onError); });
+                    db.transaction(function (tx) { tx.executeSql("CREATE TABLE IF NOT EXISTS Gebruiker (id INTEGER PRIMARY KEY AUTOINCREMENT, naam NVARCHAR(250), emailadres NVARCHAR(250), lidnr INT(11), lengte INT(11), leeftijd INT(11), gewicht INT(11))", [], null, onError); });
+                    db.transaction(function (tx) { tx.executeSql("CREATE TABLE IF NOT EXISTS Resultaten (id INTEGER PRIMARY KEY AUTOINCREMENT, Dag INT(11), Oefening INT(11), Schemaid INT(11), Oordeel INT(11), Datumtijd DATETIME, Sync BIT)", [], null, onError); });
+                }
+            }
+
+
+            function loadProperties() {
+                db.transaction(function (tx) {
+                    tx.executeSql("SELECT emailadres, lidnr, naam, lengte, leeftijd, gewicht FROM Gebruiker LIMIT 0,1", [], function (tx, result) {
+                        if (result.rows.length > 0) {
+                            item = result.rows.item(0);
+                            email = item['emailadres'];
+                            lidnr = item['lidnr'];
+                            naam = item['naam'];
+                        } else {
+                            $.mobile.changePage('aanmelden.html', { transition: "none", reload: true, changeHash: true });
+                            return;
+                        }
+
+                        db.transaction(function (tx) {
+                            tx.executeSql("SELECT versie, schema, lessen, tijden FROM Properties LIMIT 0,1", [], function (tx, result) {
+                                if (result.rows.length > 0) {
+                                    item = result.rows.item(0);
+                                    versie = item['versie'];
+                                    schema = item['schema'];
+                                    lessen = item['lessen'];
+                                    tijden = item['tijden'];
+                                } else { 
+                                    db.transaction(function (tx) { tx.executeSql("INSERT INTO Properties (versie, schema, lessen, tijden) VALUES (?, ?, ?, ?)", [1, '2015-05-03 23:00:00', '2015-05-03 23:00:00', '2015-05-03 23:00:00'], null, onError); });
+                                }
+
+                                if (!online()) {
+                                    showMessage('Er is geen verbinding met internet, de applicatie werkt offline.');
+                                } else {
+                                    ophalenUpdateDates();
+                                }
+                            });
+
+                        });
+                    }, onError);
+                });                
+            }
+
+            function ophalenUpdateDates() {
+                var SyncRows = 0;
+                db.transaction(function (tx) {
+                    tx.executeSql("SELECT COUNT(*) FROM Resultaten WHERE (Sync = 0)", [], function (tx, result) {
+                        SyncRows = result.rows.item(0)['COUNT(*)'];
+                    }, onError);
+                });
+
+                $.ajax({
+                    type: "POST",
+                    crossOrigin: true,
+                    crossDomain: true,
+                    data: { action: 'getSettings', lidnr: lidnr },
+                    dataType: "json",
+                    url: url,
+                    success: function (data) {
+                        if (data.validuser) {
+                            if (data.versie > versie) {
+                                showMessage('De versie die u momenteel gebruikt is verouderd, download de nieuwe versie uit de app store.');
+                                return;
+                            } else {
+                                if (!moment(data.schema).isSame(moment(schema))) {
+                                    alert('update schema');
+                                    aantalUpdates++;
+                                    updatingSchema(data.schema);
+                                }
+
+                                if (!moment(data.lessen).isSame(moment(lessen))) {
+                                    alert('update lessen');
+                                    aantalUpdates++;
+                                    updatingLessen(data.lessen);
+                                }
+                                
+                                if (!moment(data.tijden).isSame(moment(tijden))) {
+                                    alert('update tijden');
+                                    aantalUpdates++;
+                                    updatingTijden(data.tijden);
+                                }
+
+                                if (SyncRows > 0) {
+                                    alert('results doorsturen');
+                                    aantalUpdates++;
+                                    writeResults();
+                                }
+                                checkUpdateCount();
+                            }
+                        } else {
+                            showMessage('Geen geldige gebruiker, u kunt alleen gebruik maken van deze app als u lid bent.');
+                            return;
+                        }
+                    }
+                });
+            }
+
+            function writeResults() {
+                tx.executeSql("SELECT Schemaid, Oordeel FROM Resultaten WHERE (Sync = ?)", [0], function (tx, result) {
+                    dataset = result.rows;
+                    if(dataset.length > 0) {
+                        var oefeningen = new Array();
+                        for(i=0;i<dataset.length;i++) {
+                            item = dataset.item(i);
+											
+                            oefening = new Object();
+                            oefening.schemaid = item['Schemaid'];
+                            oefening.oordeel = item['Oordeel']; 
+                            oefeningen.push(oefening);
+                        }
+											
+                        $.ajax({
+                            type: "POST",
+                            crossOrigin: true,
+                            crossDomain : true, 
+                            data : { action: 'setResults', lidnr: lidnr, oefeningen: JSON.stringify(oefeningen) },
+                            dataType: "json",
+                            url: url,
+                            success: function (data) {
+                                alert(moment().add(240, 'minutes').format("YYYYMMdd h:mm:ss"));
+                                db.transaction(function (tx) { tx.executeSql("DELETE FROM `Resultaten` WHERE (Datumtijd < ?)", [moment().add(240, 'minutes').format("YYYYMMDDHHmmss")], null, onError); });
+                                db.transaction(function (tx) { tx.executeSql("UPDATE `Resultaten` SET Sync=1 WHERE (Sync = ?)", [0], checkProperties(), onError); }); 
+                                checkUpdateCount();
+                            },
+                            error: function(data) {
+                                showMessage('Er is iets fout gegaan met het wegschrijven van de resultaten naar de server.');
+                                checkUpdateCount();
+                            }
+                        });
+                    }
+                });
+            }
+
+
+
+            function updatingSchema(datumtijd) {
+                $.ajax({
+                    type: "POST",
+                    crossOrigin: true,
+                    crossDomain: true,
+                    data: { action: 'getSchema', lidnr: lidnr },
+                    dataType: "json",
+                    url: url,
+                    success: function (data) {
+                        db.transaction(function (tx) { tx.executeSql("DELETE FROM `Schema`", null, null, onError); });
+
+                        if (data.schema) {
+                            $(data.schema).each(function (i, item) {
+                                var dag = item.nr;
+                                if (item.oefeningen.length > 0) {
+                                    $(item.oefeningen).each(function (u, oefening) {
+                                        db.transaction(function (tx) { tx.executeSql("INSERT INTO `Schema` (schemaid, dag, soort, afbeelding, categorie, nummer, naam, tijdsduur, afstand, sets, herhalingen, gewicht, opmerking) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [oefening.schemaid, dag, oefening.soort, oefening.afbeelding, oefening.categorie, oefening.nummer, oefening.naam, oefening.tijdsduur, oefening.afstand, oefening.sets, oefening.herhalingen, oefening.gewicht, oefening.opmerking], null, onError); });
+                                    });
+                                }
+                            });
+                        }
+
+                        db.transaction(function (tx) { tx.executeSql("UPDATE Properties SET `schema` = ?", [datumtijd], null, onError); });
+                        checkUpdateCount();
+                    },
+                    error: function (data) {
+                        showMessage('Er is iets foutgegaan tijdens het bijwerken van je persoonlijke trainingsschema.');
+                        checkUpdateCount();
+                    }
+                });
+
+
+            }
+
+            function updatingLessen(datumtijd) {
+                db.transaction(function (tx) { tx.executeSql("DELETE FROM Lessen", null, null, onError); });
+
+                $.ajax({
+                    type: "POST",
+                    crossOrigin: true,
+                    crossDomain: true,
+                    data: { action: 'getLessen' },
+                    dataType: "json",
+                    url: url,
+                    success: function (data) {
+                        $(data.tijden).each(function () {
+                            var dag = $(this)[0].dag;
+                            $($(this)[0].tijden).each(function () {
+                                var tijd = $(this)[0].tijd;
+                                var tekst = $(this)[0].tekst;
+
+                                db.transaction(function (tx) { tx.executeSql("INSERT INTO Lessen (dag, tijd, tekst) VALUES (?, ?, ?)", [dag, tijd, tekst], null, onError); });
+                            });
+                        });
+                        db.transaction(function (tx) { tx.executeSql("UPDATE Properties SET lessen = ?", [datumtijd], null, onError); });
+                        checkUpdateCount();
+                    },
+                    error: function (data) {
+                        showMessage('Er is iets foutgegaan tijdens het bijwerken van de groepslessen.');
+                        checkUpdateCount();
+                    }
+                });
+
+
+            }
+
+            function updatingTijden(datumtijd) {
+                $.ajax({
+                    type: "POST",
+                    crossOrigin: true,
+                    crossDomain: true,
+                    data: { action: 'getTijden' },
+                    dataType: "json",
+                    url: url,
+                    success: function (data) {
+                        db.transaction(function (tx) { tx.executeSql("DELETE FROM Tijden", null, null, onError); });
+                        db.transaction(function (tx) { tx.executeSql("INSERT INTO Tijden (maandag, dinsdag, woensdag, donderdag, vrijdag, zaterdag, zondag, content) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [data.maandag, data.dinsdag, data.woensdag, data.donderdag, data.vrijdag, data.zaterdag, data.zondag, data.content], null, onError); });
+
+                        db.transaction(function (tx) { tx.executeSql("UPDATE Properties SET tijden = ?", [datumtijd], null, onError); });
+                        checkUpdateCount();
+                    },
+                    error: function (data) {
+                        showMessage('Er is iets foutgegaan tijdens het bijwerken van de openingstijden.');
+                        checkUpdateCount();
+                    }
+                });
+            }
+
+            function checkUpdateCount() {
+                aantalUpdates--;
+                if (aantalUpdates <= 0) {
+                    $.mobile.changePage('panel.html', { transition: "none", reload: true, changeHash: true });
+                    return;
+                }
+            }
+
+        });
+    </script>
+    <style>
+        .ui-page {
+            height: 100%;
+        }
+        #home { 
+            background: #F1C135; 
+            text-align: center;  
+            position: relative;
+            height: 100%;
+        } 
+        img.splash { 
+            position: absolute;  
+            top: 0;  
+            bottom: 0;  
+            left: 0;  
+            right: 0;  
+            margin: auto;  
+        }
+        .alertPopup {
+            margin-top: 0px;
+        }
+    </style>
+</head>
+<body>
+    <div data-role="page">        
+	    <div id="home">	 
+		    <img class="splash" src="images/splash.gif" />
+	    </div>
+    </div>
+</body>
+</html>

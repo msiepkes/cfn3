@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="css/default.css" />
+    <script src="javascript/jquery-1.11.2.min.js"></script>
+    <script src="javascript/jquery.mobile-1.4.5.min.js"></script>
+    <script type="text/javascript" src="javascript/moment.min.js"></script>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="javascript/default.js"></script>
+    
+    <script>
+        $(document).ready(function () {
+            document.addEventListener("deviceready", onDeviceReady, false);
+            //onDeviceReady();
+
+            function onDeviceReady() {
+                var prevdag = -1;
+                try {
+                    db = openDatabase("CardioFitness", "1.0", "Cardio Fitness Noord App", 200000);
+
+                    db.transaction(function (tx) {
+                        tx.executeSql("SELECT Schema.id, Schema.schemaid, Schema.dag, soort, categorie, afbeelding, nummer, naam, tijdsduur, afstand, sets, herhalingen, gewicht, opmerking, IFNULL(Oordeel, -99) AS Oordeel FROM `Schema` LEFT OUTER JOIN Resultaten ON Resultaten.dag = Schema.dag AND Resultaten.Oefening = Schema.id ORDER BY Schema.dag, Schema.id ", [], function (tx, result) {
+                            dataset = result.rows;
+                            if (dataset.length > 0) {
+                                for (i = 0; i < dataset.length; i++) {
+                                    item = dataset.item(i);
+
+                                    if (parseInt(item['dag']) != prevdag) {
+                                        var div = $('<div />').addClass('sch').css('position', 'relative').attr('data-name', 'schema ' + item['dag']);
+                                        var ul = $('<ul />').attr('data-role', 'listview').attr('data-inset', 'true').addClass('ui-listview ui-listview-inset ui-corner-all ui-shadow');
+                                        ul.appendTo(div);
+
+                                        div.appendTo($('#schemas'));
+                                    }
+
+                                    var ul = $('#schemas').find('div[data-name="schema ' + item['dag'] + '"]').find('UL');
+                                    var li = $('<li />').attr('data-icon', 'check').addClass('ui-li-has-thumb');
+
+                                    if (item['Oordeel'] == -99) {
+                                        var a = $('<a />').attr('href', '#training').attr('nr', item['id']).addClass('ui-btn ui-btn-icon-right ui-icon-check');
+                                    } else {
+                                        var a = $('<a />').attr('href', '#training').attr('nr', item['id']).addClass('checked ui-btn ui-btn-icon-right ui-icon-check');
+                                    }
+
+                                    $('<img />').attr('src', 'http://schema.cardiofitness-noord.nl/equipment/' + item['categorie'] + '/' + item['afbeelding']).addClass('icon').appendTo(a);
+                                    $('<h2 />').html(item['naam']).appendTo(a);
+
+
+                                    if (item['soort'] == 'gewicht') {
+                                        var code = '';
+                                        if (parseInt(item['sets']) != -1) { code += '<strong>Aantal sets:</strong> ' + item['sets'] + ' stuks<br />'; }
+                                        if (parseInt(item['herhalingen']) != -1) { code += '<strong>Aantal herhalingen:</strong> ' + item['herhalingen'] + ' stuks<br />'; }
+                                        if (parseInt(item['gewicht']) != -1) { code += '<strong>Gewicht:</strong> ' + item['gewicht'] + ' kg<br />'; }
+                                        code += item['opmerking'];
+                                        $('<p />').html(code).appendTo(a);
+                                    } else {
+                                        var code = '';
+                                        if (parseInt(item['afstand']) != -1) { code += '<strong>Afstand:</strong> ' + item['afstand'] + ' km<br />'; }
+                                        if (parseInt(item['tijdsduur']) != -1) { code += '<strong>Tijdsduur:</strong> ' + item['tijdsduur'] + ' minuten<br />'; }
+                                        code += item['opmerking'];
+                                        $('<p />').html(code).appendTo(a);
+                                    }
+                                    a.appendTo(li);
+                                    li.appendTo(ul);
+
+                                    prevdag = parseInt(item['dag']);
+                                }
+
+                                $('#schemas div[data-name]:not(:first)').hide();
+                                $('#schemas div[data-name] UL').each(function (item, i) {
+                                    $(item).find('li:first').addClass('ui-first-child');
+                                    $(item).find('li:last').addClass('ui-last-child');
+                                });
+
+                            }
+                        }, onError);
+                    });
+                } catch (err) {
+                    showMessage('Databases are not supported in this browser.');
+                }
+            }
+
+            $('body').on('click', 'A[href=#training]', function (e) {
+                e.preventDefault();
+
+                var nr = $(this).attr('nr');
+                db.transaction(function (tx) {
+                    tx.executeSql("SELECT Schema.id, Schema.dag, soort, categorie, afbeelding, naam, tijdsduur, afstand, sets, herhalingen, gewicht, opmerking, IFNULL(Oordeel, -99) AS Oordeel, Schema.schemaid FROM `Schema` LEFT OUTER JOIN Resultaten ON Resultaten.dag = Schema.dag AND Resultaten.Oefening = Schema.id WHERE (Schema.id = ?)", [nr], function (tx, result) {
+                        dataset = result.rows;
+                        if (dataset.length > 0) {
+                            item = dataset.item(0);
+
+                            if (item['Oordeel'] == -99) {
+                                $('#training A.oordeel').removeClass('checked');
+                            } else {
+                                $('#training A.oordeel').addClass('checked');
+                            }
+
+                            $('#training A.oordeel').attr('nr', item['id']).attr('dag', item['dag']).attr('schemaid', item['schemaid']);
+                            $('#training SPAN.naam').html(item['naam']);
+                            $('#training IMG.bigger').attr('src', 'http://schema.cardiofitness-noord.nl/equipment/' + item['categorie'] + '/' + item['afbeelding'] + '?x=1');
+
+                            if (item['soort'] == 'gewicht') {
+                                $('#training P.oefening').html('<strong>Aantal sets:</strong> ' + item['sets'] + ' stuks<br /><strong>Aantal herhalingen:</strong> ' + item['herhalingen'] + ' stuks<br /><strong>Gewicht:</strong> ' + item['gewicht'] + ' kg<br />' + item['opmerking']);
+                            } else {
+                                $('#training P.oefening').html('<strong>Afstand:</strong> ' + item['afstand'] + ' km<br /><strong>Tijdsduur:</strong> ' + item['tijdsduur'] + ' minuten<br />' + item['opmerking']);
+                            }
+                            $.mobile.changePage("#training", { transition: "none", changeHash: false });
+                        }
+                    });
+                }, onError);
+            });
+
+            $('body').on('click', 'A.oordeel', function (e) {
+                var dag = parseInt($(this).attr('dag'));
+                var nr = parseInt($(this).attr('nr'));
+                var schemaid = parseInt($(this).attr('schemaid'));
+
+                alert('toon showmessage');
+                if (!$(this).hasClass('checked')) {
+                    $('A.antwoord').attr('dag', dag);
+                    $('A.antwoord').attr('nr', nr);
+                    $('A.antwoord').attr('schemaid', schemaid);
+                    $('#myPopup').popup('open', { history: false });
+                }
+            });
+
+
+            $(".schema").on("swipeleft", function () {
+                var aantal = $('.schema').find('DIV.sch').length;
+                var zichtbaar = $('.schema DIV.sch:visible').index();
+
+                if ((zichtbaar + 1) < aantal) {
+                    $('.schema DIV.sch:visible').animate({ "left": "-400px" }, "400").hide(function () {
+                        $('.schema DIV.sch:eq(' + (zichtbaar + 1) + ')').show().css('left', '400px').animate({ "left": "0px" }, "400", function () {
+                            $('.dagschema SPAN').text($(this).attr('data-name'));
+                        });
+                    });
+                }
+            });
+
+            $(".schema").on("swiperight", function () {
+                var aantal = $('.schema').find('DIV.sch').length;
+                var zichtbaar = $('.schema DIV.sch:visible').index();
+
+                if (zichtbaar > 0) {
+                    $('.schema DIV.sch:visible').animate({ "left": "400px" }, "400").hide(function () {
+                        $('.schema DIV.sch:eq(' + (zichtbaar - 1) + ')').show().css('left', '-400px').animate({ "left": "0px" }, "400", function () {
+                            $('.dagschema SPAN').text($(this).attr('data-name'));
+                        });
+                    });
+                }
+            });
+
+            $('body').on('click', 'A.antwoord', function (e) {
+                var dag = parseInt($(this).attr('dag'));
+                var id = parseInt($(this).attr('nr'));
+                var schemaid = parseInt($(this).attr('schemaid'));
+                var val = $(this).attr('data-val');
+
+                db.transaction(function (tx) { tx.executeSql("INSERT INTO Resultaten (Dag, Oefening, Schemaid, Oordeel) VALUES (?, ?, ?, ?)", [dag, id, schemaid, val], exportResults(), onError); });
+
+                $(this).addClass('checked');
+                $('DIV[data-name="schema ' + dag + '"]').find('A[nr="' + id + '"]').addClass('checked');
+
+                $('#myPopup').popup('close');
+            });
+
+            function exportResults() {
+
+            }
+        });
+    </script>
+</head>
+<body>    
+    <div data-role="page" id="schema" class="schema">
+	    <div data-role="header" data-position="fixed">
+	        <a class="demo-icon icon-reply-outline" role="link" data-rel="back" data-transition="none" data-direction="reverse">&#xe80b;</a> 
+		    <h1>Traingsschema</h1> 
+		    <div style="display: block; text-align:center"><img src="images/logo.png" style="margin-top: 5px;" /></div>
+		    <div class="dagschema"><span>schema 1</span></div>
+	    </div>
+	    <div data-role="content" class="ui-content" id="schemas">  
+		    
+	    </div>
+	    <div data-role="footer" data-position="fixed">&nbsp;</div>
+    </div>
+
+    <div data-role="page" id="training" class="training">
+	    <div data-role="header" data-position="fixed">
+	        <a href="#schema" class="demo-icon icon-reply-outline" role="link" data-transition="none" data-direction="reverse">&#xe80b;</a> 
+		    <h1>Traingsschema</h1> 
+		    <div style="display: block; text-align:center"><img src="images/logo.png" style="margin-top: 5px;" /></div> 
+	    </div>
+	
+	    <div data-role="content" class="ui-content">
+	        <span class="naam"></span>
+	        <a class="oordeel ui-btn ui-btn-inline ui-icon-check ui-btn-icon-notext ui-corner-all ui-shadow"  style="float: right">Oordeel</a>
+	        <img class="bigger" />
+	        <p class="oefening"></p>
+	    </div>
+	
+	    <div data-role="popup" id="myPopup" class="ui-content" data-overlay-theme="b">
+		    Hoe ging de oefening ?<br /><br />
+		    <a href="#" class="antwoord" data-val="1"><img src="images/thumbs-up-sm.png" align="middle" />Goed</a><br /><br />
+		    <a href="#" class="antwoord" data-val="0"><img src="images/thumbs-down-sm.png" align="middle" />Matig</a>
+	    </div>
+	    <div data-role="footer" data-position="fixed">&nbsp;</div>
+    </div> 
+</body>
+</html>

@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="css/default.css" />
+    <script src="javascript/jquery-1.11.2.min.js"></script>
+    <script src="javascript/jquery.mobile-1.4.5.min.js"></script>
+    <script type="text/javascript" src="javascript/moment.min.js"></script>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="javascript/stopwatch.js"></script>
+    <script type="text/javascript" src="javascript/default.js"></script>
+    
+    <script>
+        var db;
+        $(document).ready(function () {
+            document.addEventListener("deviceready", onDeviceReady, false);
+            //onDeviceReady();
+
+            function onDeviceReady() {
+                try {
+                    db = openDatabase("CardioFitness", "1.0", "Cardio Fitness Noord App", 200000);
+                    //db.transaction(populateDB, onError, loadProperties);
+                } catch (err) {
+                    showMessage('Databases are not supported in this browser.');
+                }
+
+
+                $(window).unbind();
+                $(window).bind('pageshow resize orientationchange', function (e) {
+                    max_height();
+                });
+                max_height();
+            }
+
+            function max_height() {
+                var h = $('div[data-role="header"]').outerHeight(true);
+                var f = $('div[data-role="footer"]').outerHeight(true);
+                var w = $(window).height();
+                var c = $('div[data-role="content"]');
+                var c_h = c.height();
+                var c_oh = c.outerHeight(true);
+                var c_new = w - h - f - c_oh + c_h;
+                var total = h + f + c_oh;
+                if (c_h < c.get(0).scrollHeight) {
+                    c.height(c.get(0).scrollHeight);
+                } else {
+                    c.height(c_new);
+                }
+                $('#home DIV.row').css('height', (c.height() / 3) + 'px');
+            }
+
+            $('#aanmelden').click(function (e) {
+                e.preventDefault();
+
+                var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+                if(!re.test($('#email').val())) {
+                    showMessage('Vul eerst je e-mail adres in.'); return;
+                }
+                 
+                if ($('#password').val().length <= 4) { showMessage('Vul eerst je wachtwoord in.'); return; }
+
+                $.ajax({
+                    type: "POST",
+                    crossOrigin: true,
+                    crossDomain: true,
+                    data: { action: 'getUserId', email: $('#email').val(), password: $('#password').val() },
+                    dataType: "json",
+                    url: url,
+                    success: function (data) {
+                        if (data.validuser) {
+                            alert(data.name);
+                            db.transaction(function (tx) { tx.executeSql("INSERT INTO Gebruiker (naam, emailadres, lidnr, leeftijd, gewicht, lengte) VALUES (?, ?, ?, ?, ?, ?)", [data.name, $('#email').val(), data.lidnr, parseInt(data.leeftijd), parseInt(data.gewicht), parseInt(data.lengte)], toSplash(), onError); });
+                        } else {
+                            showMessage('Er zijn geen geldige gegevens ingevoerd.');
+                            return;
+                        }
+                    }
+                });
+            });
+
+            function toSplash() {
+                $.mobile.changePage('index.html', { transition: "none", reload: true, changeHash: true });
+            }
+        });
+    </script>
+
+</head>
+<body>
+    <div data-role="page">
+	    <div data-role="header" data-position="fixed">
+		    <h1>Aanmelden</h1> 
+		    <div style="display: block; text-align:center"><img src="images/logo.png" style="margin-top: 5px;" /></div>
+	    </div>
+	    <div data-role="content" class="ui-content">  
+		    <label for="email">E-mail:</label><input type="email" name="email" id="email" value="" />  
+		    <label for="password">Wachtwoord:</label><input type="password" name="password" id="password" value="" />  
+		    <br /><br />
+		    <input type="button" id="aanmelden" data-inline="false" value="Aanmelden" />
+	    </div>
+	    <div data-role="footer" data-position="fixed">&nbsp;</div>
+    </div>
+</body>
+</html>

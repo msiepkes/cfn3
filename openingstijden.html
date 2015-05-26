@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="css/default.css" />
+    <script src="javascript/jquery-1.11.2.min.js"></script>
+    <script src="javascript/jquery.mobile-1.4.5.min.js"></script>
+    <script type="text/javascript" src="javascript/moment.min.js"></script>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="javascript/default.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            document.addEventListener("deviceready", onDeviceReady, false);
+            //onDeviceReady();
+
+            function onDeviceReady() {  
+                try {
+                    db = openDatabase("CardioFitness", "1.0", "Cardio Fitness Noord App", 200000);
+                    
+                    db.transaction(function (tx) {
+                        tx.executeSql("SELECT maandag, dinsdag, woensdag, donderdag, vrijdag, zaterdag, zondag, content FROM Tijden", [], function (tx, result) { 
+                            if (result.rows.length > 0) {
+                                item = result.rows.item(0);
+                                $('#regulier').html('<div class="dag"><span>maandag:</span>' + item['maandag'] + '</div><div class="dag"><span>dinsdag:</span>' + item['dinsdag'] + '</div><div class="dag"><span>woensdag:</span>' + item['woensdag'] + '</div><div class="dag"><span>donderdag:</span>' + item['donderdag'] + '</div><div class="dag"><span>vrijdag:</span>' + item['vrijdag'] + '</div><div class="dag"><span>zaterdag:</span>' + item['zaterdag'] + '</div><div class="dag"><span>zondag:</span>' + item['zondag'] + '</div>');
+                                $('#feestdagen').html(item['content']);  
+                            }
+                        }, onError);
+                    }); 
+                } catch (err) {
+                    showMessage('Databases are not supported in this browser.');
+                }
+            }
+        });
+    </script>
+    <style>
+        .openingstijden H3.dag {
+            margin: 0px !important; 
+            -webkit-margin-before: 0px !important; 
+            -webkit-margin-after: 0px !important;
+        }
+    </style>
+</head>
+<body>
+    <div data-role="page">
+	    <div data-role="header" data-position="fixed">
+	        <a class="demo-icon icon-reply-outline" role="link" data-rel="back" data-transition="none" data-direction="reverse">&#xe80b;</a> 
+		    <h1>Openingstijden</h1> 
+		    <div style="display: block; text-align:center"><img src="images/logo.png" style="margin-top: 5px;" /></div>
+	    </div>
+	    <div data-role="content" class="ui-content openingstijden" style="height: 100%;">  
+		    <h3 class="dag">Reguliere openingstijden</h3>
+		    <div id="regulier"></div>
+		    <br />
+		    <br />
+		    <h3 class="dag">Openingstijden feestdagen</h3>
+		    <div id="feestdagen"></div>
+	    </div>
+	    <div data-role="footer" data-position="fixed">&nbsp;</div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,313 @@
+
+@font-face {
+  font-family: 'cfn';
+  src: url('../font/cfn.eot?22224300');
+  src: url('../font/cfn.eot?22224300#iefix') format('embedded-opentype'),
+	   url('../font/cfn.woff?22224300') format('woff'),
+	   url('../font/cfn.ttf?22224300') format('truetype'),
+	   url('../font/cfn.svg?22224300#cfn') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+.alertPopupBG {
+	position: absolute; 
+	top: 85px;
+	bottom: 0px; 
+	left: 0px;
+	right: 0px; 
+	background-color: #333;
+	opacity: 0.5;
+	z-index: 9998;
+}
+.alertPopupClose {
+	float: right;
+	text-decoration: none;
+	color: #f1c135;
+}
+.alertPopup {
+	position: absolute;
+	left: 0px;
+	right: 0px; 
+	background-color: #fff;
+	padding: 0px 10px 5px 10px;
+	margin-top: 41px;
+	-webkit-box-shadow: 0 5 10px rgba(0,0,0,.6);
+	-moz-box-shadow: 0 0 12px rgba(0,0,0,.6);
+	box-shadow: -1 6px 9px rgba(0,0,0,0.5);
+	z-index: 9999;
+	font-size: 13px;
+}  
+.alertPopup P {
+    min-height: 80px;
+}
+.demo-icon {
+  font-family: "cfn";
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+  display: inline-block;
+  text-decoration: inherit;
+  width: 1em;
+  margin-right: .2em;
+  text-align: center;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1em;
+  margin-left: .2em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-image: url('../images/bg.jpg');
+  text-shadow: none;
+}
+.ui-header {
+  background: #fff url('../images/top.png') repeat no-repeat;
+  border: none !important;
+  height: 85px;
+}
+.ui-header H1 {
+  text-shadow: none;
+  color: #fff;
+  font-weight: normal;
+  text-transform: uppercase;
+  font-size: 14px !important;
+  margin: 0 2px !important;
+}
+.ui-menu-btn {
+float: left;
+  margin: 7px 5px;
+  color: #fff;
+  text-shadow: none;
+  font-size: 22px;
+  font-weight: normal;
+  cursor: pointer;
+}
+.ui-page {
+  background: transparent;
+  }
+.ui-content {
+  background: transparent; 
+  min-height: 100%;
+}
+.ui-footer {
+	background: #f5d322 !important;
+	height: 1px;
+}
+
+DIV.row {
+	height: 110px;
+}
+DIV.row DIV {
+	height: 100%;
+	width: 50%;
+	background-color: #0000CC;
+	float: left;
+	color: #fff;
+	text-shadow: none;
+	text-align: center;
+	vertical-align: middle;
+	font-size: 11px;
+	cursor: pointer;
+	text-transform: uppercase;
+	font-weight: 100;
+    position: relative;
+}
+DIV.row DIV>A {
+	text-decoration: none;
+	color: #fff !important;   
+    position: absolute;
+	bottom: 25%;
+	left: 25%;
+	right: 25%;
+	top: 25%;
+	margin-top: 10px;
+}
+A.antwoord { 
+  font-size: 22px;
+  color: #666 !important;   
+}
+A.antwoord IMG {
+  margin-top: -15px;
+  margin-right: 10px;
+}
+DIV.loaderframe {
+  position: absolute;
+  z-index: 99999;
+  left: 0px;
+  right: 0px;
+  top: 47%;
+  background-color: #fff;
+  padding: 40px;
+  opacity: 0.8;
+  text-align: center;
+  font-size: 10px; 
+}
+DIV.loaderframe>DIV {
+	background-color: #000099; 
+	height: 11px; 
+	width: 100%;
+	background-image: url(../images/loading.gif); 
+	border: 1px solid #878787; 
+	border-radius: 2px;
+}
+
+DIV.row DIV>A>I {
+	font-size: 44px;
+	display: inline-block;
+	margin-bottom: 10px;
+	text-align: center;
+	width: 90%;
+	text-shadow: 2px 2px #d6a822;
+	cursor: pointer;
+}
+DIV.row DIV>A>I:hover {
+    text-shadow: 2px 2px #666;
+}
+#training IMG.bigger {
+	min-width: 200px;
+	min-height: 200px;
+	max-width: 270px;
+	max-height: 270px;
+}
+#training SPAN.naam {
+	font-weight: 700;
+	font-size: 22px;
+}
+#training P.oefening {
+  font-size: 14px;
+  margin-top: 0px;
+}
+A.icon-reply-outline {
+	float: left;
+	font-size: 22px !important; 
+	text-shadow: none !important;
+	font-weight: 100 !important;
+	margin: 7px -15px 0px 4px !important;
+	border: none !important;
+	background: transparent !important;
+	box-shadow: none !important;
+	color: #fff !important;
+	left: 0px !important;
+	top: 0px !important;
+	padding: 0px !important;
+	cursor: pointer !important;
+	padding: 10px !important;
+	margin: 0px !important; 
+}
+.icon {
+	margin: 5px !important; 
+	max-height: 4em !important; 
+}
+.ui-listview>li h2 {
+	margin: 0px !important;
+}
+.ui-listview>li p {
+	margin: 0px !important;
+	font-size: 11px;
+  	line-height: 11px;
+}
+.ui-page-theme-a .ui-btn:focus, .ui-focus {
+	-webkit-box-shadow: 0 0 12px #f5d322 !important;
+	-moz-box-shadow: 0 0 12px #f5d322 !important;
+	box-shadow: 0 0 12px #f5d322 !important;
+}
+.checked:after {
+    background-color: #f5d322;
+}
+
+.lessen {
+  font-size: 12px; 
+}
+DIV.lessen UL LI P {
+	float: right;
+	font-size: 10px;
+	margin: 0px !important;
+}
+DIV.lessen UL LI A {
+    font-size: 14px;
+    color: #444;
+}
+.openingstijden {
+  font-size: 12px;
+  line-height: 17px;
+}
+.openingstijden DIV.dag SPAN {
+  text-shadow: rgb(255, 255, 255) 0px 1px 0px;
+  text-transform: uppercase;
+  display: inline-block;
+  width: 120px;
+  font-size: 14px;
+}
+.openingstijden H3.dag {
+	text-transform: uppercase;
+	font-weight: bold;
+	color: #333333;
+	text-shadow: 0 1px 0px #fff;
+	font-size: 16px;
+}
+.stopwatch LABEL.flipswitch {
+	float: left;
+	display: inline-block;
+}
+.stopwatch DIV.ui-flipswitch {
+	float: right !important;
+	margin-top: -8px !important;
+}
+.stopwatch LABEL.aftel {
+	float: left;
+	display: inline-block;
+	  margin-top: 22px;
+}
+.stopwatch DIV.ui-input-text {
+    width: 58px;
+    float: right;
+}
+.countdown {
+	margin-top: 40px;
+}
+.ui-flipswitch {
+	background-color: #f5d322 !important;
+	border-color: #E0BA28 !important;
+	color: #fff !important;
+	text-shadow: 0 1px 0 #F4BE5D !important;
+}
+.dagschema {
+	 background-color: #666;
+	 color: #fff;
+	 text-transform: uppercase;
+	 text-align: center;
+	 text-shadow: none;
+	 font-size: 11px;
+	 padding: 6px;
+}
+.icon-left {
+float:left;
+margin-top: 2px;
+}
+.icon-right {
+float:right;
+margin-top: 2px;
+}
+
+.part {
+	display: inline-block;
+	margin-left: 15px;
+}
+.teller {
+	display: inline;
+	font-size: 60px;
+	margin-left: -4px;
+}
+.tellersmall {
+	display: inline-block;
+	font-size: 20px;
+	margin-left: -6px;
+	margin-top: 38px;
+}
+.eenheid {
+	font-size: 10px;
+	display: block;
+	margin-top: -15px;
+}

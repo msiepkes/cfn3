@@ -1,0 +1,78 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="css/default.css" />
+    <script src="javascript/jquery-1.11.2.min.js"></script>
+    <script src="javascript/jquery.mobile-1.4.5.min.js"></script>
+    <script type="text/javascript" src="javascript/moment.min.js"></script>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="javascript/default.js"></script>
+    <script type="text/javascript" src="javascript/stopwatch.js"></script>
+    
+    <script>
+        $(document).ready(function () {
+            document.addEventListener("deviceready", onDeviceReady, false);
+            //onDeviceReady();
+
+            function onDeviceReady() {
+                $('#stopwatchbutton1').click(function () {
+                    Stopwatch.start();
+                });
+                $('#stopwatchbutton2').click(function () {
+                    Stopwatch.lap();
+                });
+                $('#stopwatchbutton3').click(function () {
+                    Stopwatch.stop();
+                });
+                $('#stopwatchbutton4').click(function () {
+                    Stopwatch.restart();
+                });
+            }
+
+        });
+    </script>
+</head>
+<body>
+    <div data-role="page">
+	    <div data-role="header" data-position="fixed">
+	        <a class="demo-icon icon-reply-outline" role="link" data-rel="back" data-transition="none" data-direction="reverse">&#xe80b;</a> 
+		    <h1>Stopwatch</h1> 
+		    <div style="display: block; text-align:center"><img src="images/logo.png" style="margin-top: 5px;" /></div>
+	    </div>
+	    <div data-role="content" class="ui-content" style="height: 100%;">  
+		    <div data-role="controlgroup" data-type="horizontal" align="center">
+		      <input id="stopwatchbutton1" type="button" data-inline="true" value="Start" /> 
+		      <input id="stopwatchbutton2" type="button" data-inline="true" value="&nbsp;Lap&nbsp;" /> 
+		      <input id="stopwatchbutton3" type="button" data-inline="true" value="Stop" /> 
+		      <input id="stopwatchbutton4" type="button" data-inline="true" value="Reset" /> 
+		    </div><br /><br />
+		    <div style="display: table; width: 100%; text-align: center; position: relative">
+		     <i class="demo-icon" style="position: absolute;top: 16px;left: 10px;font-size: 12px;">&#xe804;</i>			
+			    <div style="display: table-row; width: 100%; text-align: center;">
+				    <div class="part">
+					    <span class="teller" id="uur">00</span>
+					    <span class="eenheid">uur</span>
+				    </div>
+				    <div class="part">
+					    <span class="teller" id="minuut">00</span>
+					    <span class="eenheid">minuten</span>
+				    </div>
+				    <div class="part">
+					    <span class="teller" id="seconden">00</span>
+					    <span class="eenheid">seconden</span>
+				    </div>
+				    <div class="part">
+					    <span class="tellersmall" id="honderdste">00</span>
+				    </div>
+			    </div>
+			    <div style="display: table-row; width: 100%;"><br /></div> 
+		    </div>
+		    <div id="laps" style="display: table; width: 100%; text-align: center; line-height: 26px;"></div>
+	    </div>
+	    <div data-role="footer" data-position="fixed">&nbsp;</div>
+    </div>
+</body>
+</html>

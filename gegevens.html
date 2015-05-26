@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="css/default.css" />
+    <script src="javascript/jquery-1.11.2.min.js"></script>
+    <script src="javascript/jquery.mobile-1.4.5.min.js"></script>
+    <script type="text/javascript" src="javascript/moment.min.js"></script>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="javascript/default.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            document.addEventListener("deviceready", onDeviceReady, false);
+            //onDeviceReady();
+
+            function onDeviceReady() {
+                try {
+                    db = openDatabase("CardioFitness", "1.0", "Cardio Fitness Noord App", 200000);
+
+                    db.transaction(function (tx) {
+                        tx.executeSql("SELECT emailadres, lidnr, naam, lengte, gewicht FROM Gebruiker LIMIT 0,1", [], function (tx, result) {
+                            dataset = result.rows;
+                            if (dataset.length > 0) {
+                                item = dataset.item(0);
+                                $('#naam').val(item['naam']);
+                                $('#email').val(item['emailadres']);
+                                $('#lengte').val(item['lengte']);
+                                $('#gewicht').val(item['gewicht']);
+                            }
+                        }, onError);
+                    });
+                } catch (err) {
+                    showMessage('Databases are not supported in this browser.');
+                }
+            }
+
+            $('#opslaan').click(function (e) {
+                e.preventDefault();
+
+                db.transaction(function (tx) {
+                    tx.executeSql("UPDATE Gebruiker SET emailadres=?, naam=?, lengte=?, gewicht=?", [$('#email').val(), $('#naam').val(), $('#lengte').val(), $('#gewicht').val()], function () {
+                        showMessage('De gegevens zijn opgeslagen.');
+                    }, onError);
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div data-role="page">
+	    <div data-role="header" data-position="fixed">
+	        <a class="demo-icon icon-reply-outline" role="link" data-rel="back" data-transition="none" data-direction="reverse">&#xe80b;</a> 
+		    <h1>Gegevens</h1> 
+		    <div style="display: block; text-align:center"><img src="images/logo.png" style="margin-top: 5px;" /></div>
+	    </div>
+	    <div data-role="content" class="ui-content" style="height: 100%;">  
+		    <label for="naam">Naam:</label><input type="text" name="naam" id="naam" />  
+		    <label for="email">E-mail:</label><input type="email" name="email" id="email" />
+		    <br />
+		    <label for="lengte">Lengte (cm):</label><input type="number" name="lengte" id="lengte" />
+		    <label for="gewicht">Gewicht (kg):</label><input type="number" name="gewicht" id="gewicht" />
+		    <br /><br />
+		    <input type="button" id="opslaan" data-inline="false" value="Opslaan" />
+	    </div>
+	    <div data-role="footer" data-position="fixed">&nbsp;</div>
+    </div>
+</body>
+</html>
