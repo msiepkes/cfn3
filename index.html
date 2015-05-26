@@ -18,7 +18,8 @@
             document.addEventListener("deviceready", onDeviceReady, false);
             //onDeviceReady();
 
-            function onDeviceReady() { 
+            function onDeviceReady() {
+                alert('onDeviceReady');
                 try {
                     db = openDatabase(databasename, "1.0", "Cardio Fitness Noord App", 200000);
                     db.transaction(populateDB, onError, loadProperties);
@@ -27,6 +28,7 @@
                 }
 
                 function populateDB(tx) {
+                    alert('populateDB');
                   /*  db.transaction(function (tx) { tx.executeSql("DROP TABLE Properties", [], null, onError); });
                     db.transaction(function (tx) { tx.executeSql("DROP TABLE Tijden", [], null, onError); });
                     db.transaction(function (tx) { tx.executeSql("DROP TABLE Lessen", [], null, onError); });
@@ -46,14 +48,17 @@
 
 
             function loadProperties() {
+                alert('loadProperties');
                 db.transaction(function (tx) {
                     tx.executeSql("SELECT emailadres, lidnr, naam, lengte, leeftijd, gewicht FROM Gebruiker LIMIT 0,1", [], function (tx, result) {
                         if (result.rows.length > 0) {
                             item = result.rows.item(0);
+                            alert('dbo gebruikers');
                             email = item['emailadres'];
                             lidnr = item['lidnr'];
                             naam = item['naam'];
                         } else {
+                            alert('aanmelden.html');
                             $.mobile.changePage('aanmelden.html', { transition: "none", reload: true, changeHash: true });
                             return;
                         }
@@ -62,11 +67,13 @@
                             tx.executeSql("SELECT versie, schema, lessen, tijden FROM Properties LIMIT 0,1", [], function (tx, result) {
                                 if (result.rows.length > 0) {
                                     item = result.rows.item(0);
+                                    alert('dbo Properties');
                                     versie = item['versie'];
                                     schema = item['schema'];
                                     lessen = item['lessen'];
                                     tijden = item['tijden'];
-                                } else { 
+                                } else {
+                                    alert('dbo add Properties');
                                     db.transaction(function (tx) { tx.executeSql("INSERT INTO Properties (versie, schema, lessen, tijden) VALUES (?, ?, ?, ?)", [1, '2015-05-03 23:00:00', '2015-05-03 23:00:00', '2015-05-03 23:00:00'], null, onError); });
                                 }
 
@@ -83,6 +90,7 @@
             }
 
             function ophalenUpdateDates() {
+                alert('ophalenUpdateDates');
                 var SyncRows = 0;
                 db.transaction(function (tx) {
                     tx.executeSql("SELECT COUNT(*) FROM Resultaten WHERE (Sync = 0)", [], function (tx, result) {
