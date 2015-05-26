@@ -21,7 +21,7 @@
                 var prevdag = -1;
                  
                 try {
-                    db = openDatabase("CardioFitness", "1.0", "Cardio Fitness Noord App", 200000);
+                    db = openDatabase(databasename, "1.0", "Cardio Fitness Noord App", 200000);
 
                     var ul = $('#lessen');
                     db.transaction(function (tx) {

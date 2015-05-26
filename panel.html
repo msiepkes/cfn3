@@ -25,7 +25,7 @@
 
 
                 try {
-                    db = openDatabase("CardioFitness", "1.0", "Cardio Fitness Noord App", 200000);
+                    db = openDatabase(databasename, "1.0", "Cardio Fitness Noord App", 200000);
 
                     db.transaction(function (tx) {
                         tx.executeSql("SELECT emailadres, lidnr, naam, lengte, gewicht FROM Gebruiker LIMIT 0,1", [], function (tx, result) {

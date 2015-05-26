@@ -1,7 +1,7 @@
 ﻿var url = 'http://schema.cardiofitness-noord.nl/connector.php';
 var versie = 1; 
 var lidnr = 0; 
-
+var databasename = 'CardioFitnessDB01';
 var schema = moment();
 var lessen = moment();
 var tijden = moment();

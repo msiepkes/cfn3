@@ -18,7 +18,7 @@
 
             function onDeviceReady() {  
                 try {
-                    db = openDatabase("CardioFitness", "1.0", "Cardio Fitness Noord App", 200000);
+                    db = openDatabase(databasename, "1.0", "Cardio Fitness Noord App", 200000);
                     
                     db.transaction(function (tx) {
                         tx.executeSql("SELECT maandag, dinsdag, woensdag, donderdag, vrijdag, zaterdag, zondag, content FROM Tijden", [], function (tx, result) { 

@@ -20,7 +20,7 @@
 
             function onDeviceReady() { 
                 try {
-                    db = openDatabase("CardioFitness", "1.0", "Cardio Fitness Noord App", 200000);
+                    db = openDatabase(databasename, "1.0", "Cardio Fitness Noord App", 200000);
                     db.transaction(populateDB, onError, loadProperties);
                 } catch (err) {
                     showMessage('Databases are not supported in this browser.');
